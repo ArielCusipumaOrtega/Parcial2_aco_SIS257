@@ -16,6 +16,14 @@ export enum EstadoEvento {
   CANCELADO = 'Cancelado',
 }
 
+// Enum para categoria_evento
+export enum CategoriaEvento {
+  CONCIERTO = 'Concierto',
+  TEATRO = 'Teatro',
+  DANZA = 'Danza',
+  FESTIVAL = 'Festival',
+}
+
 @Entity('eventos_culturales')
 export class EventoCultural {
   @PrimaryGeneratedColumn('identity')
@@ -26,6 +34,10 @@ export class EventoCultural {
 
   @Column('varchar', { length: 150 })
   titulo: string;
+
+  // Campo categoria_evento
+  @Column('varchar', { name: 'categoria_evento', length: 50 })
+  categoria_evento: string;
 
   @Column('varchar', { name: 'artista_principal', length: 100 })
   artistaPrincipal: string;

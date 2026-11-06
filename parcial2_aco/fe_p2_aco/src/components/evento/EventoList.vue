@@ -29,6 +29,7 @@ const eventosFiltrados = computed(() => {
   if (!query) return eventos.value
   return eventos.value.filter((e) => {
     const titulo = e.titulo.toLowerCase()
+    const categoria = (e.categoria_evento ?? '').toLowerCase() // Filtrar por categoria_evento
     const artista = (e.artistaPrincipal ?? e.artista_principal ?? '').toLowerCase()
     const recinto = (e.recinto?.nombre ?? '').toLowerCase()
     const ciudad = (e.recinto?.ciudad ?? '').toLowerCase()
@@ -36,6 +37,7 @@ const eventosFiltrados = computed(() => {
     const fecha = (e.fechaEvento ?? e.fecha_evento ?? '').toLowerCase()
     return (
       titulo.includes(query) ||
+      categoria.includes(query) ||
       artista.includes(query) ||
       recinto.includes(query) ||
       ciudad.includes(query) ||
@@ -82,7 +84,7 @@ defineExpose({ obtenerLista })
       <input
         v-model="busqueda"
         type="text"
-        placeholder="Buscar evento por título, artista, recinto, fecha o estado..."
+        placeholder="Buscar evento por título, categoría, artista, recinto, fecha o estado..."
         class="search-input"
       />
       <button
@@ -102,6 +104,8 @@ defineExpose({ obtenerLista })
           <tr>
             <th style="width: 50px">#</th>
             <th>Título del Evento</th>
+            <!-- Columna categoria_evento -->
+            <th>Categoría</th>
             <th>Artista / Elenco</th>
             <th>Recinto & Ciudad</th>
             <th>Fecha</th>
@@ -115,24 +119,28 @@ defineExpose({ obtenerLista })
           <tr v-for="(evento, index) in eventosFiltrados" :key="evento.id">
             <td class="text-muted font-mono">{{ index + 1 }}</td>
             <td class="font-medium text-white">{{ evento.titulo }}</td>
+            <!-- Mostrar categoria_evento -->
+            <td>
+              <span class="category-badge">{{ evento.categoria_evento }}</span>
+            </td>
             <td class="text-secondary">
-              {{ evento.artistaPrincipal ?? evento.artista_principal }}
+              {{ evento.artistaPrincipal }}
             </td>
             <td>
               <span v-if="evento.recinto">
                 <span class="text-white block font-medium">{{ evento.recinto.nombre }}</span>
                 <small class="text-muted block">{{ evento.recinto.ciudad }}</small>
               </span>
-              <span v-else class="text-muted">ID: {{ evento.idRecinto ?? evento.id_recinto }}</span>
+              <span v-else class="text-muted">ID: {{ evento.idRecinto }}</span>
             </td>
             <td class="text-secondary">
-              {{ evento.fechaEvento ?? evento.fecha_evento }}
+              {{ evento.fechaEvento }}
             </td>
             <td class="text-center text-secondary">
-              {{ evento.duracionMinutos ?? evento.duracion_minutos }} min
+              {{ evento.duracionMinutos }} min
             </td>
             <td class="text-right font-medium text-white">
-              Bs. {{ Number(evento.precioEntrada ?? evento.precio_entrada ?? 0).toFixed(2) }}
+              Bs. {{ Number(evento.precioEntrada ?? 0).toFixed(2) }}
             </td>
             <td class="text-center">
               <span
@@ -168,7 +176,7 @@ defineExpose({ obtenerLista })
             </td>
           </tr>
           <tr v-if="eventosFiltrados.length === 0">
-            <td colspan="9" class="empty-state">
+            <td colspan="10" class="empty-state">
               No se encontraron eventos culturales registrados.
             </td>
           </tr>
@@ -176,7 +184,6 @@ defineExpose({ obtenerLista })
       </table>
     </div>
 
-    <!-- Diálogo de Confirmación -->
     <Dialog
       v-model:visible="mostrarConfirmDialog"
       header="Eliminar Evento Cultural"
@@ -289,6 +296,18 @@ defineExpose({ obtenerLista })
 
 .clean-table tr:hover td {
   background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Estilo badge para categoria_evento */
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 4px;
+  background-color: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.3);
 }
 
 .status-badge {

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import http from '@/plugins/axios'
 import axios from 'axios'
-import type { EventoCultural, EstadoEvento } from '@/models/evento-cultural'
+import type { EventoCultural, EstadoEvento, CategoriaEvento } from '@/models/evento-cultural'
 import type { Recinto } from '@/models/recinto'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -27,6 +27,14 @@ const recintos = ref<Recinto[]>([])
 const cargando = ref(false)
 const errorMensaje = ref('')
 
+// Opciones para categoria_evento
+const opcionesCategoria: { label: string; value: CategoriaEvento }[] = [
+  { label: 'Concierto', value: 'Concierto' },
+  { label: 'Teatro', value: 'Teatro' },
+  { label: 'Danza', value: 'Danza' },
+  { label: 'Festival', value: 'Festival' },
+]
+
 const opcionesEstado: { label: string; value: EstadoEvento }[] = [
   { label: 'Programado', value: 'Programado' },
   { label: 'Agotado', value: 'Agotado' },
@@ -37,6 +45,7 @@ const form = ref<{
   id?: number
   idRecinto: number | null
   titulo: string
+  categoria_evento: CategoriaEvento // Campo categoria_evento
   artistaPrincipal: string
   duracionMinutos: number | null
   precioEntrada: number | null
@@ -45,6 +54,7 @@ const form = ref<{
 }>({
   idRecinto: null,
   titulo: '',
+  categoria_evento: 'Concierto', // Valor inicial categoria_evento
   artistaPrincipal: '',
   duracionMinutos: 90,
   precioEntrada: 0,
@@ -72,6 +82,7 @@ watch(
           id: ev.id,
           idRecinto: ev.idRecinto ?? ev.id_recinto ?? (ev.recinto?.id ?? null),
           titulo: ev.titulo,
+          categoria_evento: ev.categoria_evento || 'Concierto', // Cargar categoria_evento
           artistaPrincipal: ev.artistaPrincipal ?? ev.artista_principal ?? '',
           duracionMinutos: ev.duracionMinutos ?? ev.duracion_minutos ?? 90,
           precioEntrada: Number(ev.precioEntrada ?? ev.precio_entrada ?? 0),
@@ -91,6 +102,7 @@ function resetForm() {
   form.value = {
     idRecinto: primerRecintoId,
     titulo: '',
+    categoria_evento: 'Concierto', // Resetear categoria_evento
     artistaPrincipal: '',
     duracionMinutos: 90,
     precioEntrada: 0,
@@ -112,12 +124,17 @@ const dialogVisible = computed({
 async function handleSave() {
   errorMensaje.value = ''
 
-  if (!form.value.idRecinto) {
-    errorMensaje.value = 'Debe seleccionar un recinto de la lista.'
-    return
-  }
   if (!form.value.titulo.trim()) {
     errorMensaje.value = 'El título del evento cultural es obligatorio.'
+    return
+  }
+  // Validar categoria_evento
+  if (!form.value.categoria_evento) {
+    errorMensaje.value = 'Debe seleccionar una categoría para el evento.'
+    return
+  }
+  if (!form.value.idRecinto) {
+    errorMensaje.value = 'Debe seleccionar un recinto de la lista.'
     return
   }
   if (!form.value.artistaPrincipal.trim()) {
@@ -146,6 +163,7 @@ async function handleSave() {
     const body = {
       idRecinto: form.value.idRecinto,
       titulo: form.value.titulo.trim(),
+      categoria_evento: form.value.categoria_evento, // Asignar categoria_evento
       artistaPrincipal: form.value.artistaPrincipal.trim(),
       duracionMinutos: Number(form.value.duracionMinutos),
       precioEntrada: Number(form.value.precioEntrada),
@@ -204,7 +222,25 @@ async function handleSave() {
       </div>
 
       <div class="grid">
-        <div class="col-12 md:col-7">
+        <!-- Select de categoria_evento -->
+        <div class="col-12 md:col-6">
+          <div class="field mb-3 flex flex-column gap-1">
+            <label for="categoriaEventoSelect" class="form-label">
+              Categoría de Evento <span class="text-red-400">*</span>
+            </label>
+            <Select
+              id="categoriaEventoSelect"
+              v-model="form.categoria_evento"
+              :options="opcionesCategoria"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Seleccionar categoría..."
+              class="w-full"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
           <div class="field mb-3 flex flex-column gap-1">
             <label for="recintoSelect" class="form-label">
               Recinto <span class="text-red-400">*</span>
@@ -217,6 +253,23 @@ async function handleSave() {
               optionValue="id"
               placeholder="Seleccionar recinto..."
               class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col-12 md:col-7">
+          <div class="field mb-3 flex flex-column gap-1">
+            <label for="artistaEvento" class="form-label">
+              Artista o Agrupación Principal <span class="text-red-400">*</span>
+            </label>
+            <InputText
+              id="artistaEvento"
+              v-model="form.artistaPrincipal"
+              class="w-full"
+              placeholder="Ej. Los Kjarkas"
+              autocomplete="off"
             />
           </div>
         </div>
@@ -237,19 +290,6 @@ async function handleSave() {
             />
           </div>
         </div>
-      </div>
-
-      <div class="field mb-3 flex flex-column gap-1">
-        <label for="artistaEvento" class="form-label">
-          Artista o Agrupación Principal <span class="text-red-400">*</span>
-        </label>
-        <InputText
-          id="artistaEvento"
-          v-model="form.artistaPrincipal"
-          class="w-full"
-          placeholder="Ej. Los Kjarkas"
-          autocomplete="off"
-        />
       </div>
 
       <div class="grid">

@@ -43,6 +43,7 @@ API REST para la **Agenda y Boletaje de Eventos Culturales**, desarrollada con *
 | `id` | INTEGER | PRIMARY KEY (identity) | Identificador auto numérico |
 | `id_recinto` | INTEGER | NOT NULL (FK -> `recintos.id`) | Relación con el recinto |
 | `titulo` | VARCHAR(150) | NOT NULL | Título del evento cultural |
+| `categoria_evento` | VARCHAR(50) | NOT NULL | Enum: `'Concierto'`, `'Teatro'`, `'Danza'`, `'Festival'` |
 | `artista_principal` | VARCHAR(100) | NOT NULL | Artista o agrupación principal |
 | `duracion_minutos` | INTEGER | NOT NULL | Duración en minutos |
 | `precio_entrada` | NUMERIC(10,2) | NOT NULL | Precio de la entrada |

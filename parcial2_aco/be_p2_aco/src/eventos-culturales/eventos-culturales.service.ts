@@ -46,6 +46,12 @@ export class EventosCulturalesService {
       throw new BadRequestException('El campo fecha_evento es obligatorio');
     }
 
+    // Validar categoria_evento
+    const categoria_evento = createDto.categoria_evento;
+    if (!categoria_evento) {
+      throw new BadRequestException('El campo categoria_evento es obligatorio');
+    }
+
     // Validar existencia del recinto
     const recinto = await this.recintosRepository.findOneBy({ id: idRecinto });
     if (!recinto) {
@@ -65,6 +71,7 @@ export class EventosCulturalesService {
     const evento = new EventoCultural();
     evento.idRecinto = idRecinto;
     evento.titulo = createDto.titulo.trim();
+    evento.categoria_evento = categoria_evento; // Asignar categoria_evento
     evento.artistaPrincipal = artistaPrincipal.trim();
     evento.duracionMinutos = duracionMinutos;
     evento.precioEntrada = Number(precioEntrada);
@@ -107,6 +114,11 @@ export class EventosCulturalesService {
 
     if (updateDto.titulo !== undefined) {
       evento.titulo = updateDto.titulo.trim();
+    }
+
+    // Actualizar categoria_evento
+    if (updateDto.categoria_evento !== undefined) {
+      evento.categoria_evento = updateDto.categoria_evento;
     }
 
     const artistaPrincipal = updateDto.artistaPrincipal;

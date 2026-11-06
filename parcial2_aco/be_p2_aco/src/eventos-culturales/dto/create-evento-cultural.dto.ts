@@ -26,6 +26,19 @@ export class CreateEventoCulturalDto {
   @MaxLength(150, { message: 'El campo titulo no debe exceder los 150 caracteres' })
   readonly titulo: string;
 
+  // Validaciones para categoria_evento
+  @ApiProperty({
+    example: 'Concierto',
+    description: 'Categoría del evento: Concierto, Teatro, Danza, Festival',
+    enum: ['Concierto', 'Teatro', 'Danza', 'Festival'],
+  })
+  @IsNotEmpty({ message: 'El campo categoria_evento es obligatorio' })
+  @IsString({ message: 'El campo categoria_evento debe ser una cadena de texto' })
+  @IsIn(['Concierto', 'Teatro', 'Danza', 'Festival'], {
+    message: 'La categoria_evento debe ser uno de los siguientes valores: Concierto, Teatro, Danza, Festival',
+  })
+  readonly categoria_evento: string;
+
   @ApiPropertyOptional({ example: 'Orquesta Sinfónica Nacional', description: 'Artista o agrupación principal' })
   @IsOptional()
   @IsString({ message: 'El artista principal debe ser una cadena de texto' })
